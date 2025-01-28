@@ -15,53 +15,79 @@ import static com.sofkau.util.Log4j.LOG4J_PROPERTIES_FILE_PATH;
 
 public class WebUI {
 
-
     protected WebDriver driver;
 
-    private void setUpWebDriver(){
-        WebDriverManager.chromedriver().setup();
-        WebDriverManager.edgedriver().setup();
-    }
-    private void setUpWebdriverGoogle(){
-
-        ChromeOptions co = new ChromeOptions();
-        co.addArguments("--remote-allow-origins=*");
-        driver = new ChromeDriver(co);
-        driver.get(ZonaFitUrl);
-        maximize();
+    // Configura WebDriverManager para Chrome y Edge
+    private void setUpWebDriver() {
+        try {
+            WebDriverManager.chromedriver().setup();
+            WebDriverManager.edgedriver().setup();
+        } catch (Exception e) {
+            System.out.println("Error al configurar WebDriverManager: " + e.getMessage());
+            throw e;  // Lanza el error para que se pueda manejar en el lugar correspondiente
+        }
     }
 
-    private void setUpWebdriverEdge(){
-
-        EdgeOptions co = new EdgeOptions();
-        co.addArguments("--remote-allow-origins=*");
-        driver = new EdgeDriver(co);
-        driver.get(ZonaFitUrl);
-        maximize();
+    // Configura el WebDriver para Chrome
+    private void setUpWebdriverGoogle() {
+        try {
+            ChromeOptions co = new ChromeOptions();
+            co.addArguments("--remote-allow-origins=*");
+            driver = new ChromeDriver(co);
+            driver.get(ZonaFitUrl);
+            maximize();
+        } catch (Exception e) {
+            System.out.println("Error al inicializar el WebDriver de Chrome: " + e.getMessage());
+            throw e;
+        }
     }
 
+    // Configura el WebDriver para Edge
+    private void setUpWebdriverEdge() {
+        try {
+            EdgeOptions co = new EdgeOptions();
+            co.addArguments("--remote-allow-origins=*");
+            driver = new EdgeDriver(co);
+            driver.get(ZonaFitUrl);
+            maximize();
+        } catch (Exception e) {
+            System.out.println("Error al inicializar el WebDriver de Edge: " + e.getMessage());
+            throw e;
+        }
+    }
 
+    // Configuración general para Chrome
     protected void generalSetUpChrome() {
         setUplog4j();
-        setUpWebdriverGoogle();
-        setUpWebDriver();
+        setUpWebDriver();  // Configura los controladores
+        setUpWebdriverGoogle();  // Inicializa el driver de Chrome
     }
+
+    // Configuración general para Edge
     protected void generalSetUpEdge() {
         setUplog4j();
-        setUpWebdriverEdge();
-        setUpWebDriver();
+        setUpWebDriver();  // Configura los controladores
+        setUpWebdriverEdge();  // Inicializa el driver de Edge
     }
 
-
-    protected void  quiteDriver(){
-        driver.quit();
+    // Cierra el driver
+    protected void quiteDriver() {
+        if (driver != null) {
+            driver.quit();
+        } else {
+            System.out.println("El driver no está inicializado.");
+        }
     }
 
-    private void maximize(){
-        driver.manage().window().maximize();
+    // Maximiza la ventana del navegador
+    protected void maximize() {
+        if (driver != null) {
+            driver.manage().window().maximize();
+        }
     }
 
-    private void setUplog4j(){
+    // Configura Log4j
+    private void setUplog4j() {
         PropertyConfigurator.configure(USER_DIR.value() + LOG4J_PROPERTIES_FILE_PATH.getValue());
-}
+    }
 }

@@ -9,6 +9,10 @@ import io.cucumber.java.en.When;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import com.sofkau.pages.FormPage.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import static com.sofkau.setup.ConstantSetup.ZonaFitUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlujoDeCompraStepDefinition extends WebUI {
@@ -16,28 +20,50 @@ public class FlujoDeCompraStepDefinition extends WebUI {
     public static Logger LOGGER = Logger.getLogger(IniciarSesionOutlineStepDefinition.class);
     @Given("estoy en la pagina principal de ZonaFit usando {string}")
     public void estoyEnLaPaginaPrincipalDeZonaFitUsando(String navegador) {
-
         try {
             if (navegador.equals("chrome")){
+                LOGGER.info("Iniciando navegador Chrome...");
                 generalSetUpChrome();
-                LOGGER.info("Inicio de la Automatizacion");
-
+                LOGGER.info("Navegador Chrome iniciado.");
             } else if (navegador.equals("edge")) {
+                LOGGER.info("Iniciando navegador Edge...");
                 generalSetUpEdge();
-                LOGGER.info("Inicio de la Automatizacion");
+                LOGGER.info("Navegador Edge iniciado.");
             }
-
         } catch (Exception exception){
             quiteDriver();
-            Assertions.fail(exception.getMessage(),exception);
-            LOGGER.warn(exception.getMessage(), exception);
+            LOGGER.error("Error al inicializar el navegador: " + exception.getMessage());
+            Assertions.fail("Error en la inicialización del navegador: " + exception.getMessage());
         }
 
-
-
-        FormPage formPage= new FormPage( super.driver,facturacion_envio);
+        FormPage formPage = new FormPage(super.driver, facturacion_envio);
+        LOGGER.info("Formulario inicializado correctamente.");
     }
-
+    private void setUpWebdriverGoogle() {
+        try {
+            ChromeOptions co = new ChromeOptions();
+            co.addArguments("--remote-allow-origins=*");
+            driver = new ChromeDriver(co);
+            driver.get(ZonaFitUrl);
+            maximize();
+            LOGGER.info("Navegador Chrome inicializado correctamente.");
+        } catch (Exception e) {
+            LOGGER.error("Error al inicializar el navegador Chrome: " + e.getMessage());
+            throw e;  // Re-lanzar la excepción para que se maneje en el bloque catch
+        }
+    }
+    protected void quiteDriver() {
+        try {
+            if (driver != null) {
+                driver.quit();
+                LOGGER.info("Navegador cerrado correctamente.");
+            } else {
+                LOGGER.warn("El driver es null, no se puede cerrar.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error al intentar cerrar el navegador: " + e.getMessage());
+        }
+    }
 
     @When("selecciono y anado productos al carrito de compras")
     public void seleccionoYAnadoProductosAlCarritoDeCompras() {
@@ -65,12 +91,13 @@ public class FlujoDeCompraStepDefinition extends WebUI {
             LOGGER.info("mensaje actual:"+Mensajeactual);
 
 
-        } catch (Exception exception) {
+        }
+        catch (Exception exception) {
             quiteDriver();
             Assertions.fail(exception.getMessage(), exception);
             LOGGER.warn(exception.getMessage(), exception);
             LOGGER.error("la asercion no cumple");
-}
+        }
 
     }
 
